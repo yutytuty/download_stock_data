@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from alpaca_trade_api.rest import REST, TimeFrame
 import pandas as pd
@@ -29,7 +30,9 @@ def download_data(rest: REST, symbol, lock: threading.Lock):
         symbol, TimeFrame.Minute, START_DATE, END_DATE,
         adjustment='raw'
     ).df
-    data.to_csv(f"./data/{symbol}.csv")
+    if not os.path.exists(f"./data/{START_DATE}->{END_DATE}"):
+        os.mkdir(f"./data/{START_DATE}->{END_DATE}")
+    data.to_csv(f"./data/{START_DATE}->{END_DATE}/{symbol}.csv")
     with lock:
         print(f"Done downloading {symbol} data")
 
