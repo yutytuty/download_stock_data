@@ -1,6 +1,5 @@
 import datetime
 import os
-
 from alpaca_trade_api.rest import REST, TimeFrame
 import pandas as pd
 import threading
@@ -18,29 +17,36 @@ dotenv.load_dotenv()
 # YYYY-MM-DD
 # CHANGE TO REAL DATES
 # -------------------------
-START_DATE = "2021-05-08"
-END_DATE = "2021-06-08"
+start_date = "2021-04-08"
+end_date = "2021-05-08"
 # -------------------------
 
 
 def download_data(rest: REST, symbol, lock: threading.Lock):
     with lock:
-        print(f"Downloading {symbol} data...")
+        print(f'downloading {symbol} data...')
+
     data = rest.get_bars(
-        symbol, TimeFrame.Minute, START_DATE, END_DATE,
+        symbol,
+        TimeFrame.Minute,
+        start_date,
+        end_date,
         adjustment='raw'
     ).df
-    if not os.path.exists(f"./data/{START_DATE}->{END_DATE}"):
-        os.mkdir(f"./data/{START_DATE}->{END_DATE}")
-    data.to_csv(f"./data/{START_DATE}->{END_DATE}/{symbol}.csv")
+
+    if not os.path.exists(f'./data/{start_date}->{end_date}'):
+        os.mkdir(f'./data/{start_date}->{end_date}')
+    
+    data.to_csv(f'./data/{start_date}->{end_date}/{symbol}.csv')
+
     with lock:
-        print(f"Done downloading {symbol} data")
+        print(f'done downloading {symbol} data')
 
 
 def main():
     api = REST()
 
-    tickers = pd.read_csv("./tickers.csv")["Symbol"]
+    tickers = pd.read_csv('./tickers.csv')['Symbol']
 
     lock = threading.Lock()
     request_num = 0
@@ -64,11 +70,11 @@ def main():
                 running_threads.append(t)
                 t.start()
             else:
-                print("Reached 40 requests. Waiting for reset.")
+                print('reached 40 requests, waiting for reset...')
                 start_time = datetime.datetime.now()
                 while (datetime.datetime.now().minute - start_time.minute) < 1:
                     pass
-                print("Request count reset")
+                print('request count reset')
                 request_num = 0
 
 
